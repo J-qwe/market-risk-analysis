@@ -1,0 +1,12 @@
+[client]
+showErrorDetails = true
+
+[server]
+headless = true
+port = 8502
+enableXsrfProtection = false
+allowRunOnSave = true
+
+# 远程访问配置
+serverAddress = "0.0.0.0"
+enableCORS = false
