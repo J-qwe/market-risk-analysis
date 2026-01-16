@@ -3,9 +3,9 @@ Flask==2.3.3
 flask-cors==4.0.0
 requests==2.31.0
 streamlit==1.28.1
-pandas==2.2.0
+pandas>=2.3.0
 plotly==5.18.0
-numpy>=1.24.3  # pandas的依赖
+numpy>=1.24.3
 
 # 爬虫相关
 beautifulsoup4==4.12.2
