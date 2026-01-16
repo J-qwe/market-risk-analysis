@@ -27,9 +27,15 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # 导入本地爬虫（用于演示）
 from crawler.eastmoney_crawler import EastMoneyUltimateCrawler
+import os
 
-# API配置
-API_BASE_URL = "http://localhost:5000/api"
+# API配置 - 自动适配本地和云环境
+if os.environ.get('RENDER'):
+    # 在 Render 上运行，使用同一个域名
+    API_BASE_URL = "/api"
+else:
+    # 本地开发，使用 localhost
+    API_BASE_URL = "http://localhost:5000/api"
 
 # 初始化本地爬虫（用于演示）
 crawler = EastMoneyUltimateCrawler()

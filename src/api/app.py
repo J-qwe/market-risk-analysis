@@ -558,11 +558,18 @@ if __name__ == '__main__':
     for industry, count in industry_count.items():
         logger.info(f"   {industry}: {count} 只")
     
-    logger.info("API服务运行在 http://localhost:5000")
+    # 获取端口 - 支持 Render 环境变量
+    import os
+    port = int(os.environ.get('PORT', 5000))
+    
+    if os.environ.get('RENDER'):
+        logger.info(f"API服务运行在 Render 环境，端口 {port}")
+    else:
+        logger.info(f"API服务运行在 http://localhost:{port}")
     
     app.run(
         host='0.0.0.0',
-        port=5000,
-        debug=True,
+        port=port,
+        debug=not os.environ.get('RENDER'),  # 生产环境关闭 debug
         threaded=True
     )
