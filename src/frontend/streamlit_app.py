@@ -100,6 +100,11 @@ def get_stock_list():
 
 def analyze_stock(stock_code, pages=2, use_real=True):
     """分析股票舆情"""
+    # 云环境直接使用本地爬虫
+    if os.environ.get('RENDER'):
+        return analyze_stock_local(stock_code, pages, use_real)
+    
+    # 本地环境尝试调用 API
     try:
         payload = {
             "stock_code": stock_code,
@@ -114,8 +119,57 @@ def analyze_stock(stock_code, pages=2, use_real=True):
         if response.status_code == 200:
             return response.json()
     except Exception as e:
-        st.error(f"API调用失败: {e}")
+        # API 失败，使用本地模式
+        return analyze_stock_local(stock_code, pages, use_real)
     return None
+
+def analyze_stock_local(stock_code, pages=2, use_real=True):
+    """使用本地爬虫分析股票（无需 API）"""
+    try:
+        # 获取股票信息
+        stock_info = crawler.stock_info.get(stock_code, {})
+        stock_name = stock_info.get("name", stock_code)
+        
+        # 爬取新闻
+        articles = crawler.crawl_stock_news(stock_code, pages=pages, use_cache=not use_real)
+        
+        if not articles:
+            return {
+                "success": False,
+                "message": "未能获取到新闻数据"
+            }
+        
+        # 简单的情感分析（关键词匹配）
+        risk_articles = []
+        risk_keywords = ["下跌", "暴跌", "风险", "警示", "调查", "亏损", "违规", "处罚"]
+        
+        for article in articles:
+            title = article.get("title", "")
+            # 检查是否包含风险关键词
+            risk_score = 0
+            for keyword in risk_keywords:
+                if keyword in title:
+                    risk_score -= 0.3
+            
+            if risk_score < -0.2:
+                article["sentiment_score"] = risk_score
+                article["sentiment_label"] = "风险"
+                risk_articles.append(article)
+        
+        return {
+            "success": True,
+            "stock_code": stock_code,
+            "stock_name": stock_name,
+            "total_articles": len(articles),
+            "risk_articles": risk_articles,
+            "risk_count": len(risk_articles),
+            "message": f"分析完成，共发现 {len(risk_articles)} 篇风险文章"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"分析失败: {str(e)}"
+        }
 
 def display_sidebar():
     """显示侧边栏"""
