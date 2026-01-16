@@ -123,15 +123,17 @@ def display_sidebar():
         st.title("📈 市场舆情风险挖掘系统")
         st.markdown("---")
         
-        # API状态
-        api_healthy, api_info = check_api_health()
-        if api_healthy:
-            st.success("✅ API服务正常")
-            if api_info:
-                st.caption(f"服务状态: {api_info.get('timestamp', '')}")
+        # API状态 - 云环境直接使用本地模式
+        if os.environ.get('RENDER'):
+            st.info("🌐 云端运行模式")
         else:
-            st.error("❌ API服务不可用")
-            st.info("将使用本地模式（部分功能受限）")
+            api_healthy, api_info = check_api_health()
+            if api_healthy:
+                st.success("✅ API服务正常")
+                if api_info:
+                    st.caption(f"服务状态: {api_info.get('timestamp', '')}")
+            else:
+                st.warning("⚠️ 使用本地模式（部分功能受限）")
         
         st.markdown("---")
         
